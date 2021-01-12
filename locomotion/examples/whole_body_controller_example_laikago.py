@@ -1,4 +1,4 @@
-"""Example of whole body controller on A1 robot."""
+"""Example of whole body controller on laikago robot."""
 from absl import app
 from absl import flags
 from absl import logging
@@ -20,7 +20,7 @@ from locomotion.agents.whole_body_controller import openloop_gait_generator
 from locomotion.agents.whole_body_controller import raibert_swing_leg_controller
 from locomotion.agents.whole_body_controller import torque_stance_leg_controller
 
-from locomotion.robots import a1
+from locomotion.robots import laikago
 from locomotion.robots import a1_robot
 from locomotion.robots import robot_config
 from locomotion.robots.gamepad import gamepad_reader
@@ -79,15 +79,15 @@ _INIT_LEG_STATE = (
 
 def _generate_example_linear_angular_speed(t):
   """Creates an example speed profile based on time for demo purpose."""
-  vx = 1.5
+  vx = 0.8
   vy = 0.2
   wz = 0.8
 
   # time_points = (0, 5, 10, 15, 20, 25, 30)
   time_points = (0, 1, 2, 3, 4, 5, 6)
 
-  speed_points = ((0, 0, 0, 0), (vx, 0, 0, 0), (vx, 0, 0, 0), (0, 0, 0, -wz),
-                  (0, -vy, 0, 0), (0, 0, 0, 0), (0, 0, 0, wz))
+  speed_points = ((0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, -0),
+                  (0, -0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0))
 
   speed = scipy.interpolate.interp1d(time_points,
                                      speed_points,
@@ -156,7 +156,7 @@ def main(argv):
   else:
     p = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
   p.setPhysicsEngineParameter(numSolverIterations=30)
-  p.setTimeStep(0.001)
+  p.setTimeStep(0.0025)
   p.setGravity(0, 0, -9.8)
   p.setPhysicsEngineParameter(enableConeFriction=0)
   p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -171,7 +171,7 @@ def main(argv):
         time_step=0.002,
         action_repeat=1)
   else:
-    robot = a1.A1(p,
+    robot = laikago.Laikago(p,
                   motor_control_mode=robot_config.MotorControlMode.HYBRID,
                   enable_action_interpolation=False,
                   reset_time=2,
