@@ -51,10 +51,14 @@ MOTOR_NAMES = [
     "RL_lower_leg_2_upper_leg_joint",
 ]
 INIT_RACK_POSITION = [0, 0, 1]
+#初始质心位置
 INIT_POSITION = [0, 0, 0.48]
 JOINT_DIRECTIONS = np.array([-1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1])
+#一关节偏置
 HIP_JOINT_OFFSET = 0.0
+#二关节偏置，0为水平
 UPPER_LEG_JOINT_OFFSET = -0.6
+#三关节偏置
 KNEE_JOINT_OFFSET = 0.66
 DOFS_PER_LEG = 3
 JOINT_OFFSETS = np.array(
@@ -63,14 +67,14 @@ PI = math.pi
 
 MAX_MOTOR_ANGLE_CHANGE_PER_STEP = 0.2
 _DEFAULT_HIP_POSITIONS = (
-    (0.21, -0.1157, 0),
-    (0.21, 0.1157, 0),
-    (-0.21, -0.1157, 0),
-    (-0.21, 0.1157, 0),
+    (0.22, -0.0875, 0),
+    (0.22, 0.0875, 0),
+    (-0.22, -0.0875, 0),
+    (-0.22, 0.0875, 0),
 )
 
-HIP_OFFSETS = np.array([[0.21, -0.1157, 0.], [0.21, 0.1157, 0.],
-                        [-0.21, -0.1157, 0.], [-0.21, 0.1157, 0.]
+HIP_OFFSETS = np.array([[0.22, -0.0875, 0.], [0.22, 0.0875, 0.],
+                        [-0.22, -0.0875, 0.], [-0.22, 0.0875, 0.]
                         ])
 
 ABDUCTION_P_GAIN = 220.0
@@ -101,11 +105,16 @@ _LINK_A_FIELD_NUMBER = 3
 UPPER_BOUND = 6.28318548203
 LOWER_BOUND = -6.28318548203
 
+L_UP_LINK = 0.25
+L_LOW_LINK = 0.25
+# L_HIP = 0.037
+L_HIP = 0.04
+
 @numba.jit(nopython=True, cache=True)
 def foot_position_in_hip_frame_to_joint_angle(foot_position, l_hip_sign=1):
   l_up = 0.25
   l_low = 0.25
-  l_hip = 0.037 * l_hip_sign
+  l_hip = L_HIP * l_hip_sign
   x, y, z = foot_position[0], foot_position[1], foot_position[2]
   theta_knee = -np.arccos(
       (x**2 + y**2 + z**2 - l_hip**2 - l_low**2 - l_up**2) /
@@ -123,7 +132,7 @@ def foot_position_in_hip_frame(angles, l_hip_sign=1):
   theta_ab, theta_hip, theta_knee = angles[0], angles[1], angles[2]
   l_up = 0.25
   l_low = 0.25
-  l_hip = 0.037 * l_hip_sign
+  l_hip = L_HIP * l_hip_sign
   leg_distance = np.sqrt(l_up**2 + l_low**2 +
                          2 * l_up * l_low * np.cos(theta_knee))
   eff_swing = theta_hip + theta_knee / 2
@@ -148,7 +157,7 @@ def analytical_leg_jacobian(leg_angles, leg_id):
   """
   l_up = 0.25
   l_low = 0.25
-  l_hip = 0.037  * (-1)**(leg_id + 1)
+  l_hip = L_HIP  * (-1)**(leg_id + 1)
 
   t1, t2, t3 = leg_angles[0], leg_angles[1], leg_angles[2]
   l_eff = np.sqrt(l_up**2 + l_low**2 + 2 * l_up * l_low * np.cos(t3))
@@ -185,7 +194,7 @@ class Laikago(minitaur.Minitaur):
   MPC_BODY_INERTIA = np.array((0.07335, 0, 0, 0, 0.25068, 0, 0, 0, 0.25447)) * 4.
   # down the body
   MPC_BODY_HEIGHT = 0.42
-  #MPC_BODY_HEIGHT = 0.38
+  MPC_BODY_HEIGHT = 0.38
   MPC_VELOCITY_MULTIPLIER = 0.5
   ACTION_CONFIG = [
       locomotion_gym_config.ScalarField(name="motor_angle_0",
