@@ -16,7 +16,7 @@ class QPTorqueOptimizer():
   def __init__(self,
                robot_mass,
                robot_inertia,
-               friction_coef=0.45,
+               friction_coef=0.424,
                f_min_ratio=0.1,
                f_max_ratio=10.):
     self.mpc_body_mass = robot_mass
@@ -43,7 +43,7 @@ class QPTorqueOptimizer():
              col_id:col_id + 3] = np.array([0, 1, self.friction_coef])
       self.A[row_id + 3,
              col_id:col_id + 3] = np.array([0, -1, self.friction_coef])
-
+# M 
   def compute_mass_matrix(self, foot_positions):
     mass_mat = np.zeros((6, 12))
     mass_mat[:3] = np.concatenate([self.inv_mass] * 4, axis=1)
@@ -64,7 +64,7 @@ class QPTorqueOptimizer():
     lb[contact_ids * 2] = f_min
     lb[contact_ids * 2 + 1] = -f_max
     return self.A.T, lb
-
+# 
   def compute_objective_matrix(self, mass_matrix, desired_acc, acc_weight,
                                reg_weight):
     g = np.array([0., 0., 9.8, 0., 0., 0.])
@@ -85,6 +85,7 @@ class QPTorqueOptimizer():
     G, a = self.compute_objective_matrix(mass_matrix, desired_acc, acc_weight,
                                          reg_weight)
     C, b = self.compute_constraint_matrix(contacts)
+    #Golaoxu : 防止0使得结果发散
     G += 1e-4 * np.eye(12)
     result = quadprog.solve_qp(G, a, C, b)
     return -result[0].reshape((4, 3))

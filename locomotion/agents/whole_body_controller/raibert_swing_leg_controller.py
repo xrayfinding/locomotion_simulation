@@ -20,6 +20,7 @@ _KP = np.array([0.01, 0.01, 0.01]) * 3
 _FOOT_CLEARANCE_M = 0.01
 
 
+
 def _gen_parabola(phase: float, start: float, mid: float, end: float) -> float:
   """Gets a point on a parabola y = a x^2 + b x + c.
 
@@ -136,6 +137,7 @@ class RaibertSwingLegController(leg_controller.LegController):
         self._robot.GetFootPositionsInBaseFrame())
     self._joint_angles = {}
 
+#确保每次摆动腿时，更新了last_leg_state，作为摆动初始位置
   def update(self, current_time: float) -> None:
     """Called at each control step.
 
@@ -178,11 +180,14 @@ class RaibertSwingLegController(leg_controller.LegController):
       # print(hip_horizontal_velocity)
       target_hip_horizontal_velocity = (
           self.desired_speed + self.desired_twisting_speed * twisting_vector)
+
+      # golaoxu : add capture point part to the formular
       foot_target_position = (
           hip_horizontal_velocity *
           self._gait_generator.stance_duration[leg_id] / 2 - _KP *
           (target_hip_horizontal_velocity - hip_horizontal_velocity)
       ) - self._desired_height + np.array((hip_offset[0], hip_offset[1], 0))
+      
       foot_position = _gen_swing_foot_trajectory(
           self._gait_generator.normalized_phase[leg_id],
           self._phase_switch_foot_local_position[leg_id], foot_target_position)

@@ -1,4 +1,5 @@
 """Example of whole body controller on laikago robot."""
+"""Golaoxu : This is a example for simple model QP (mit use), not a WBC..."""
 from absl import app
 from absl import flags
 from absl import logging
@@ -38,7 +39,7 @@ _NUM_SIMULATION_ITERATION_STEPS = 300
 _MAX_TIME_SECONDS = 30.
 
 _STANCE_DURATION_SECONDS = [
-    0.13
+    0.2
 ] * 4  # For faster trotting (v > 1.5 ms reduce this to 0.13s). or slower time is 0.3
 
 # Standing
@@ -65,9 +66,12 @@ _STANCE_DURATION_SECONDS = [
 
 # Trotting
 #_DUTY_FACTOR = [0.3] * 4 #占空比
-_DUTY_FACTOR = [0.5] * 4 #占空比
 
-_INIT_PHASE_FULL_CYCLE = [0.9, 0, 0, 0.9]
+#站立时间/总时间
+_DUTY_FACTOR = [0.6] * 4 #占空比
+
+# Full cycle : [STANCE + SWING]
+_INIT_PHASE_FULL_CYCLE = [1, 0, 0, 1]
 
 _INIT_LEG_STATE = (
     gait_generator_lib.LegState.SWING,
@@ -156,7 +160,7 @@ def main(argv):
   else:
     p = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
   p.setPhysicsEngineParameter(numSolverIterations=30)
-  p.setTimeStep(0.0025)
+  p.setTimeStep(0.001)
   p.setGravity(0, 0, -9.8)
   p.setPhysicsEngineParameter(enableConeFriction=0)
   p.setAdditionalSearchPath(pybullet_data.getDataPath())
