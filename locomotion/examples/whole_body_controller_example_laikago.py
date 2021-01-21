@@ -39,7 +39,7 @@ _NUM_SIMULATION_ITERATION_STEPS = 300
 _MAX_TIME_SECONDS = 30.
 
 _STANCE_DURATION_SECONDS = [
-    0.2
+    3
 ] * 4  # For faster trotting (v > 1.5 ms reduce this to 0.13s). or slower time is 0.3
 
 # Standing
@@ -68,10 +68,12 @@ _STANCE_DURATION_SECONDS = [
 #_DUTY_FACTOR = [0.3] * 4 #占空比
 
 #站立时间/总时间
-_DUTY_FACTOR = [0.6] * 4 #占空比
+_DUTY_FACTOR = [1.0,0.01,0.01,1.0]  #占空比
+#_DUTY_FACTOR = [0.5]*4  #占空比
+
 
 # Full cycle : [STANCE + SWING]
-_INIT_PHASE_FULL_CYCLE = [1, 0, 0, 1]
+_INIT_PHASE_FULL_CYCLE = [0, 0, 0, 0]
 
 _INIT_LEG_STATE = (
     gait_generator_lib.LegState.SWING,
@@ -160,11 +162,12 @@ def main(argv):
   else:
     p = bullet_client.BulletClient(connection_mode=pybullet.DIRECT)
   p.setPhysicsEngineParameter(numSolverIterations=30)
-  p.setTimeStep(0.001)
+  p.setTimeStep(0.002)
   p.setGravity(0, 0, -9.8)
   p.setPhysicsEngineParameter(enableConeFriction=0)
   p.setAdditionalSearchPath(pybullet_data.getDataPath())
-  p.loadURDF("plane.urdf")
+  p.loadURDF("plane100.urdf")
+ # p.loadURDF("table_square/table_square.urdf")
 
   # Construct robot class:
   if FLAGS.use_real_robot:
@@ -172,14 +175,14 @@ def main(argv):
         pybullet_client=p,
         motor_control_mode=robot_config.MotorControlMode.HYBRID,
         enable_action_interpolation=False,
-        time_step=0.002,
+        time_step=0.004,
         action_repeat=1)
   else:
     robot = laikago.Laikago(p,
                   motor_control_mode=robot_config.MotorControlMode.HYBRID,
                   enable_action_interpolation=False,
                   reset_time=2,
-                  time_step=0.002,
+                  time_step=0.004,
                   action_repeat=1)
 
   controller = _setup_controller(robot)

@@ -16,7 +16,7 @@ class QPTorqueOptimizer():
   def __init__(self,
                robot_mass,
                robot_inertia,
-               friction_coef=0.424,
+               friction_coef=0.45,
                f_min_ratio=0.1,
                f_max_ratio=10.):
     self.mpc_body_mass = robot_mass

@@ -187,14 +187,29 @@ def foot_positions_in_base_frame(foot_angles):
   
   return foot_positions + HIP_OFFSETS
 
+@numba.jit(nopython=True, cache=True, parallel=True)
+def calcu_R_from_rpy(phi,theta,psi):
+    '''
+    Rotation matrix calculation using numba for acceleration
+    The input parameter is roll pitch yaw
+    Return array as np.mat is not supported
 
+    x-axis rotation angle phi
+    y-axis rotation angle theta
+    z-axis rotation angle psi
+    '''
+    R_ = np.array([[                                   np.cos(psi)*np.cos(theta),                                  -np.sin(psi)*np.cos(theta),             np.sin(theta)],
+                    [ np.sin(psi)*np.cos(phi) + np.cos(psi)*np.sin(phi)*np.sin(theta), np.cos(psi)*np.cos(phi) - np.sin(psi)*np.sin(phi)*np.sin(theta), -np.cos(theta)*np.sin(phi)],
+                    [ np.sin(psi)*np.sin(phi) - np.cos(psi)*np.cos(phi)*np.sin(theta), np.cos(psi)*np.sin(phi) + np.sin(psi)*np.cos(phi)*np.sin(theta),  np.cos(phi)*np.cos(theta)]])
+    return R_
 class Laikago(minitaur.Minitaur):
   """A simulation for the Laikago robot."""
   MPC_BODY_MASS = 215/9.8
   MPC_BODY_INERTIA = np.array((0.07335, 0, 0, 0, 0.25068, 0, 0, 0, 0.25447)) * 4.
   # down the body
   MPC_BODY_HEIGHT = 0.42
-  MPC_BODY_HEIGHT = 0.38
+  #MPC_BODY_HEIGHT = 0.38
+  #MPC_BODY_HEIGHT = 0.38
   MPC_VELOCITY_MULTIPLIER = 0.5
   ACTION_CONFIG = [
       locomotion_gym_config.ScalarField(name="motor_angle_0",
@@ -352,6 +367,12 @@ class Laikago(minitaur.Minitaur):
     motor_angles = self.GetMotorAngles()[leg_id * 3:(leg_id + 1) * 3]
     return analytical_leg_jacobian(motor_angles, leg_id)
 
+  def ComputeR(self,rpy):
+    roll = rpy[0]
+    pitch = rpy[1]
+    yaw = rpy[2]
+    R_ = calcu_R_from_rpy(roll, pitch, yaw)
+    return R_
   def ResetPose(self, add_constraint):
     del add_constraint
     for name in self._joint_name_to_id:
@@ -482,6 +503,8 @@ class Laikago(minitaur.Minitaur):
                              current_motor_angles - max_angle_change,
                              current_motor_angles + max_angle_change)
     return motor_commands
+
+  #def GetBasePosition(self):
 
   @classmethod
   def GetConstants(cls):

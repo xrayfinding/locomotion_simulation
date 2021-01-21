@@ -14,7 +14,8 @@ from locomotion.agents.whole_body_controller import gait_generator as gait_gener
 from locomotion.agents.whole_body_controller import leg_controller
 
 # The position correction coefficients in Raibert's formula.
-_KP = np.array([0.01, 0.01, 0.01]) * 3
+#_KP = np.array([0.01, 0.01, 0.01]) * 3
+_KP = np.array([0.0, 0.0, 0.0]) * 3
 # At the end of swing, we leave a small clearance to prevent unexpected foot
 # collision.
 _FOOT_CLEARANCE_M = 0.01
@@ -183,7 +184,7 @@ class RaibertSwingLegController(leg_controller.LegController):
 
       # golaoxu : add capture point part to the formular
       foot_target_position = (
-          hip_horizontal_velocity *
+          0 * hip_horizontal_velocity *
           self._gait_generator.stance_duration[leg_id] / 2 - _KP *
           (target_hip_horizontal_velocity - hip_horizontal_velocity)
       ) - self._desired_height + np.array((hip_offset[0], hip_offset[1], 0))
@@ -194,10 +195,19 @@ class RaibertSwingLegController(leg_controller.LegController):
       joint_ids, joint_angles = (
           self._robot.ComputeMotorAnglesFromFootLocalPosition(
               leg_id, foot_position))
+      #print(joint_angles)
+
+      
+      #零时测试;将两条腿的关节位置定死
+      joint_angles[0] = 0.04
+      joint_angles[1] = 0.8
+      joint_angles[2] = -2
+
+
       # Update the stored joint angles as needed.
       for joint_id, joint_angle in zip(joint_ids, joint_angles):
         self._joint_angles[joint_id] = (joint_angle, leg_id)
-
+    #print(self._joint_angles)
     action = {}
     kps = self._robot.GetMotorPositionGains()
     kds = self._robot.GetMotorVelocityGains()
