@@ -177,7 +177,7 @@ def analytical_leg_jacobian(leg_angles, leg_id):
       t_eff) / l_eff + l_eff * np.sin(t_eff) * np.cos(t1) / 2
   return J
 
-@numba.jit(nopython=True, cache=True, parallel=True)
+@numba.jit(nopython=True, cache=True, parallel=False)
 def foot_positions_in_base_frame(foot_angles):
   foot_angles = foot_angles.reshape((4, 3))
   foot_positions = np.zeros((4, 3))
@@ -187,7 +187,7 @@ def foot_positions_in_base_frame(foot_angles):
   
   return foot_positions + HIP_OFFSETS
 
-@numba.jit(nopython=True, cache=True, parallel=True)
+@numba.jit(nopython=True, cache=True, parallel=False)
 def calcu_R_from_rpy(phi,theta,psi):
     '''
     Rotation matrix calculation using numba for acceleration
@@ -373,6 +373,7 @@ class Laikago(minitaur.Minitaur):
     yaw = rpy[2]
     R_ = calcu_R_from_rpy(roll, pitch, yaw)
     return R_
+
   def ResetPose(self, add_constraint):
     del add_constraint
     for name in self._joint_name_to_id:

@@ -154,6 +154,7 @@ def analytical_leg_jacobian(leg_angles, leg_id):
       t_eff) / l_eff + l_eff * np.sin(t_eff) * np.cos(t1) / 2
   return J
 
+
 @numba.jit(nopython=True, cache=True, parallel=True)
 def foot_positions_in_base_frame(foot_angles):
   foot_angles = foot_angles.reshape((4, 3))
