@@ -72,10 +72,11 @@ _DEFAULT_HIP_POSITIONS = (
     (-0.22, -0.0875, 0),
     (-0.22, 0.0875, 0),
 )
+COM_OFFSET = -np.array([0.002284, -0.000041, 0.025165])
 
 HIP_OFFSETS = np.array([[0.22, -0.0875, 0.], [0.22, 0.0875, 0.],
                         [-0.22, -0.0875, 0.], [-0.22, 0.0875, 0.]
-                        ])
+                        ]) + COM_OFFSET
 
 ABDUCTION_P_GAIN = 220.0
 ABDUCTION_D_GAIN = 0.3
@@ -365,6 +366,7 @@ class Laikago(minitaur.Minitaur):
     #return super(Laikago, self).ComputeJacobian(leg_id)[(2, 0, 1), :]
 
     motor_angles = self.GetMotorAngles()[leg_id * 3:(leg_id + 1) * 3]
+    print(motor_angles)
     return analytical_leg_jacobian(motor_angles, leg_id)
 
   def ComputeR(self,rpy):

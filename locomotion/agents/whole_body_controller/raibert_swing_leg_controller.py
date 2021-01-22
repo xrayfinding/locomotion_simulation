@@ -21,7 +21,6 @@ _KP = np.array([0.0, 0.0, 0.0]) * 3
 _FOOT_CLEARANCE_M = 0.01
 
 
-
 def _gen_parabola(phase: float, start: float, mid: float, end: float) -> float:
   """Gets a point on a parabola y = a x^2 + b x + c.
 
@@ -124,6 +123,8 @@ class RaibertSwingLegController(leg_controller.LegController):
 
     self._joint_angles = None
     self._phase_switch_foot_local_position = None
+    self.MAX_STEP_INIT = 0
+
     self.reset(0)
 
   def reset(self, current_time: float) -> None:
@@ -197,12 +198,13 @@ class RaibertSwingLegController(leg_controller.LegController):
               leg_id, foot_position))
       #print(joint_angles)
 
-      
+      print(joint_angles)
       #零时测试;将两条腿的关节位置定死
-      joint_angles[0] = 0.04
+      joint_angles[0] = 0.00
       joint_angles[1] = 0.8
-      joint_angles[2] = -2
-
+      if(self.MAX_STEP_INIT < 20000):
+        joint_angles[2] = -1.69 - 0.6 * (self.MAX_STEP_INIT/20000) 
+        self.MAX_STEP_INIT = self.MAX_STEP_INIT + 1
 
       # Update the stored joint angles as needed.
       for joint_id, joint_angle in zip(joint_ids, joint_angles):
